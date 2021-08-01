@@ -1,0 +1,13 @@
+[Unit]
+Description=matrix-media-repo
+After=network.target postgresql@11-main.service matrix-synapse.service
+
+[Service]
+Type=simple
+User=matrix-media
+WorkingDirectory=/opt/matrix-media-repo
+ExecStart=/opt/matrix-media-repo/media_repo --config /etc/matrix-media-repo/media-repo.yaml
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

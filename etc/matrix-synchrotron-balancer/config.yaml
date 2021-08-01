@@ -1,0 +1,11 @@
+homeserver_url: http://localhost:8008
+listener: localhost:8083
+synchrotrons:
+  - address: localhost:8510
+    pid_file: /etc/matrix-synapse/workers/generic_worker1.pid
+  - address: localhost:8511
+    pid_file: /etc/matrix-synapse/workers/generic_worker2.pid
+  - address: localhost:8512
+    pid_file: /etc/matrix-synapse/workers/generic_worker3.pid
+balancer:
+  interval: 2

@@ -1,0 +1,5 @@
+# Specify environment variables used when running Synapse
+# SYNAPSE_CACHE_FACTOR=0.5 (default)
+SYNAPSE_CACHE_FACTOR=2.0
+#LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so
+#LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2

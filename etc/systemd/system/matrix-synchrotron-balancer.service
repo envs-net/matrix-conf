@@ -1,0 +1,13 @@
+[Unit]
+Description=matrix-synchrotron-balancer
+After=network.target matrix-synapse.service
+
+[Service]
+Type=simple
+User=synchrotron
+WorkingDirectory=/opt/matrix-synchrotron-balancer
+ExecStart=/opt/matrix-synchrotron-balancer/matrix-synchrotron-balancer
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
