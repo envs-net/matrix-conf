@@ -11,6 +11,7 @@ more informations on https://envs.net/chat/matrix/
 
 [synapse-delagate](https://github.com/matrix-org/synapse/blob/master/docs/delegate.md)<br />
 [synapse-workers](https://github.com/matrix-org/synapse/blob/master/docs/workers.md)
+[synapse-metrics](https://github.com/matrix-org/synapse/blob/master/docs/metrics-howto.md)
 
 [synapse admin API](https://github.com/matrix-org/synapse/tree/master/docs/admin_api)
 
