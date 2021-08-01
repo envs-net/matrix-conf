@@ -1,0 +1,123 @@
+# Sample config for Prometheus.
+
+global:
+  scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+
+  # Attach these labels to any time series or alerts when communicating with
+  # external systems (federation, remote storage, Alertmanager).
+#  external_labels:
+#      monitor: 'example'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets: ['localhost:9093']
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+   - "/etc/prometheus/synapse-v2.rules"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: 'prometheus'
+
+    # Override the global default and scrape targets from this job every 5 seconds.
+    scrape_interval: 5s
+    scrape_timeout: 5s
+
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'grafana'
+    scrape_interval: 15s
+    scrape_timeout: 5s
+    static_configs:
+      - targets: ['localhost:3000']
+
+###
+
+  - job_name: 'synapse'
+    metrics_path: '/_synapse/metrics'
+    static_configs:
+      - targets: ['matrix.envs.net:9000']
+        labels:
+          instance: All
+          group: synapse
+          worker: main
+
+      - targets: ['matrix.envs.net:9101']
+        labels:
+          job: federation_sender
+          instance: All
+          group: synapse
+          worker: federation_sender
+
+      - targets: ['matrix.envs.net:9102']
+        labels:
+          job: federation_sender
+          instance: All
+          group: synapse
+          worker: federation_sender2
+
+      - targets: ['matrix.envs.net:9103']
+        labels:
+          job: federation_sender
+          instance: All
+          group: synapse
+          worker: federation_sender3
+
+      - targets: ['matrix.envs.net:9110']
+        labels:
+          job: background_worker
+          instance: All
+          group: synapse
+          worker: background_worker
+
+      - targets: ['matrix.envs.net:9111']
+        labels:
+          job: pusher
+          instance: All
+          group: synapse
+          worker: pusher
+
+      - targets: ['matrix.envs.net:9121']
+        labels:
+          job: appservice
+          instance: All
+          group: synapse
+          worker: appservice
+
+      - targets: ['matrix.envs.net:9131']
+        labels:
+          job: generic_worker
+          instance: All
+          group: synapse
+          worker: generic_worker1
+
+      - targets: ['matrix.envs.net:9132']
+        labels:
+          job: generic_worker
+          instance: All
+          group: synapse
+          worker: generic_worker2
+
+      - targets: ['matrix.envs.net:9133']
+        labels:
+          job: generic_worker
+          instance: All
+          group: synapse
+          worker: generic_worker3
+
+
+  - job_name: 'media-repo'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['matrix.envs.net:9001']
