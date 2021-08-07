@@ -2740,7 +2740,7 @@ opentracing:
 ## Workers ##
 
 worker_app: synapse.app.homeserver
-#worker_name: homeserver
+#worker_name: synapse
 
 notify_appservices: false
 start_pushers: false
@@ -2778,6 +2778,9 @@ instance_map:
   generic_worker2:
     host: localhost
     port: 9095
+  generic_worker3:
+    host: localhost
+    port: 9096
 
 # Experimental: When using workers you can define which workers should
 # handle event persistence and typing notifications. Any worker
@@ -2790,6 +2793,7 @@ stream_writers:
   events:
     - generic_worker1
     - generic_worker2
+    - generic_worker3
 #  typing: worker1
 
 # The worker that is used to run background tasks (e.g. cleaning up expired
