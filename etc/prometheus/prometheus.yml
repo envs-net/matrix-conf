@@ -58,7 +58,7 @@ scrape_configs:
           job: federation_sender
           instance: All
           group: synapse
-          worker: federation_sender
+          worker: federation_sender1
 
       - targets: ['matrix.envs.net:9102']
         labels:
@@ -115,6 +115,13 @@ scrape_configs:
           instance: All
           group: synapse
           worker: generic_worker3
+
+      - targets: ['matrix.envs.net:9134']
+        labels:
+          job: generic_worker
+          instance: All 
+          group: synapse
+          worker: generic_worker4
 
 
   - job_name: 'media-repo'
