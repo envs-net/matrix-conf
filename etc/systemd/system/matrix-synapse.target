@@ -1,7 +1,7 @@
 [Unit]
 Description=Synapse parent target
 After=network.target
-Requires=postgresql@11-main.service
+Requires=postgresql@13-main.service
 Requires=redis-server.service
 
 [Install]
