@@ -41,7 +41,7 @@ federation:
 # user instead. Using the same server is fine, just not the same username and database.
 database:
   # Currently only "postgres" is supported.
-  postgres: "postgres://matrix:password@localhost/matrixmedia?sslmode=disable"
+  postgres: "postgres://matrix:xxx@localhost/matrixmedia?sslmode=disable"
 
   # The database pooling options
   pool:
@@ -262,7 +262,7 @@ downloads:
   # The cache control settings for downloads. This can help speed up downloads for users by
   # keeping popular media in the cache. This cache is also used for thumbnails.
   cache:
-    enabled: true
+    enabled: false
 
     # The maximum size of cache to have. Higher numbers are better.
     maxSizeBytes: 1048576000 # 1GB default
@@ -444,7 +444,7 @@ thumbnails:
 # Controls for the rate limit functionality
 rateLimit:
   # Set this to false if rate limiting is handled at a higher level or you don't want it enabled.
-  enabled: true
+  enabled: false
 
   # The number of requests per second before an IP will be rate limited. Must be a whole number.
   requestsPerSecond: 1
@@ -550,22 +550,21 @@ featureSupport:
       # so it can be mapped to a volume.
       repoPath: "./ipfs"
 
-  # Support for redis as a cache mechanism
-  #
-  # Note: Enabling Redis support will mean that the existing cache mechanism will do nothing.
-  # It can be safely disabled once Redis support is enabled.
-  #
-  # See docs/redis.md for more information on how this works and how to set it up.
-  redis:
-    # Whether or not use Redis instead of in-process caching.
-    enabled: false
+# Support for redis as a cache mechanism
+#
+# Note: Enabling Redis support will mean that the existing cache mechanism will do nothing.
+# It can be safely disabled once Redis support is enabled.
+#
+# See docs/redis.md for more information on how this works and how to set it up.
+redis:
+  # Whether or not use Redis instead of in-process caching.
+  enabled: true
 
-    # The Redis shards that should be used by the media repo in the ring. The names of the
-    # shards are for your reference and have no bearing on the connection, but must be unique.
-    shards:
-      - name: "server1"
-        addr: ":7000"
-      - name: "server2"
-        addr: ":7001"
-      - name: "server3"
-        addr: ":7002"
+  # The database number to use. Leave at zero if using a dedicated Redis instance.
+  databaseNumber: 15
+
+  # The Redis shards that should be used by the media repo in the ring. The names of the
+  # shards are for your reference and have no bearing on the connection, but must be unique.
+  shards:
+    - name: "127.0.0.1"
+      addr: ":6379"

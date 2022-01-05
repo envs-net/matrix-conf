@@ -49,7 +49,7 @@ modules:
       # Flag messages sent by servers/users in the ban lists as spam. Currently
       # this means that spammy messages will appear as empty to users. Default
       # false.
-      block_messages: true
+      block_messages: false
       # Remove users from the user directory search by filtering matrix IDs and
       # display names by the entries in the user ban list. Default false.
       block_usernames: false
@@ -62,6 +62,8 @@ modules:
         - "!UyrSHIwWgbGsHjabGe:envs.net"
         # matrix-coc-bl
         - "!WuBtumawCeOGEieRrp:matrix.org"
+        # matrix-tos-bl
+        - "!tUPwPPmVTaiKXMiijj:matrix.org"
 
 
 ## Server ##
@@ -108,7 +110,27 @@ web_client_location: "https://element.envs.net/"
 # Otherwise, it should be the URL to reach Synapse's client HTTP listener (see
 # 'listeners' below).
 #
+# Defaults to 'https://<server_name>/'.
+#
 public_baseurl: "https://matrix.envs.net/"
+
+# Uncomment the following to tell other servers to send federation traffic on
+# port 443.
+#
+# By default, other servers will try to reach our server on port 8448, which can
+# be inconvenient in some environments.
+#
+# Provided 'https://<server_name>/' on port 443 is routed to Synapse, this
+# option configures Synapse to serve a file at
+# 'https://<server_name>/.well-known/matrix/server'. This will tell other
+# servers to send traffic to port 443 instead.
+#
+# See https://matrix-org.github.io/synapse/latest/delegate.html for more
+# information.
+#
+# Defaults to 'false'.
+#
+serve_server_wellknown: true
 
 # Set the soft limit on the number of file descriptors synapse can use
 # Zero is used to indicate synapse should set the soft limit to the
@@ -124,20 +146,6 @@ presence:
   # replaces the previous top-level 'use_presence' option.
   #
   enabled: true
-
-  # Presence routers are third-party modules that can specify additional logic
-  # to where presence updates from users are routed.
-  #
-  presence_router:
-    # The custom module's class. Uncomment to use a custom presence router module.
-    #
-    #module: "my_custom_router.PresenceRouter"
-
-    # Configuration options of the custom module. Refer to your module's
-    # documentation for available options.
-    #
-    #config:
-    #  example_option: 'something'
 
 # Whether to require authentication to retrieve profile data (avatars,
 # display names) of other users through the client API. Defaults to
@@ -226,6 +234,8 @@ allow_public_rooms_over_federation: true
 # listed here, since they correspond to unroutable addresses.)
 #
 # This option replaces federation_ip_range_blacklist in Synapse v1.25.0.
+#
+# Note: The value is ignored when an HTTP proxy is in use
 #
 #ip_range_blacklist:
 #  - '127.0.0.0/8'
@@ -382,6 +392,23 @@ listeners:
   #  bind_addresses: ['127.0.0.1']
   #  type: manhole
 
+# Connection settings for the manhole
+#
+manhole_settings:
+  # The username for the manhole. This defaults to 'matrix'.
+  #
+  #username: manhole
+
+  # The password for the manhole. This defaults to 'rabbithole'.
+  #
+  #password: mypassword
+
+  # The private and public SSH key pair used to encrypt the manhole traffic.
+  # If these are left unset, then hardcoded and non-secret keys are used,
+  # which could allow traffic to be intercepted if sent over a public network.
+  #
+  #ssh_priv_key_path: CONFDIR/id_rsa
+  #ssh_pub_key_path: CONFDIR/id_rsa.pub
 
 # Forward extremities can build up in a room due to networking delays between
 # homeservers. Once this happens in a large room, calculation of the state of
@@ -502,6 +529,48 @@ redaction_retention_period: 7d
 #
 user_ips_max_age: 7d
 
+# Inhibits the /requestToken endpoints from returning an error that might leak
+# information about whether an e-mail address is in use or not on this
+# homeserver.
+# Note that for some endpoints the error situation is the e-mail already being
+# used, and for others the error is entering the e-mail being unused.
+# If this option is enabled, instead of returning an error, these endpoints will
+# act as if no error happened and return a fake session ID ('sid') to clients.
+#
+#request_token_inhibit_3pid_errors: true
+
+# A list of domains that the domain portion of 'next_link' parameters
+# must match.
+#
+# This parameter is optionally provided by clients while requesting
+# validation of an email or phone number, and maps to a link that
+# users will be automatically redirected to after validation
+# succeeds. Clients can make use this parameter to aid the validation
+# process.
+#
+# The whitelist is applied whether the homeserver or an
+# identity server is handling validation.
+#
+# The default value is no whitelist functionality; all domains are
+# allowed. Setting this value to an empty list will instead disallow
+# all domains.
+#
+#next_link_domain_whitelist: ["matrix.org"]
+
+# Templates to use when generating email or HTML page contents.
+#
+templates:
+  # Directory in which Synapse will try to find template files to use to generate
+  # email or HTML page contents.
+  # If not set, or a file is not found within the template directory, a default
+  # template from within the Synapse package will be used.
+  #
+  # See https://matrix-org.github.io/synapse/latest/templates.html for more
+  # information about using custom templates.
+  #
+  #custom_template_directory: /var/lib/matrix-synapse/res/templates/
+
+
 # Message retention policy at the server level.
 #
 # Room admins and mods can define a retention period for their rooms using the
@@ -575,55 +644,15 @@ retention:
   purge_jobs:
     - longest_max_lifetime: 1h
       interval: 30m
-    - longest_max_lifetime: 12h
-      interval: 1h
     - shortest_max_lifetime: 1h
+      longest_max_lifetime: 12h
+      interval: 1h
+    - shortest_max_lifetime: 12h
       longest_max_lifetime: 1d
       interval: 12h
     - shortest_max_lifetime: 1d
       longest_max_lifetime: 3y
       interval: 24h
-
-# Inhibits the /requestToken endpoints from returning an error that might leak
-# information about whether an e-mail address is in use or not on this
-# homeserver.
-# Note that for some endpoints the error situation is the e-mail already being
-# used, and for others the error is entering the e-mail being unused.
-# If this option is enabled, instead of returning an error, these endpoints will
-# act as if no error happened and return a fake session ID ('sid') to clients.
-#
-#request_token_inhibit_3pid_errors: true
-
-# A list of domains that the domain portion of 'next_link' parameters
-# must match.
-#
-# This parameter is optionally provided by clients while requesting
-# validation of an email or phone number, and maps to a link that
-# users will be automatically redirected to after validation
-# succeeds. Clients can make use this parameter to aid the validation
-# process.
-#
-# The whitelist is applied whether the homeserver or an
-# identity server is handling validation.
-#
-# The default value is no whitelist functionality; all domains are
-# allowed. Setting this value to an empty list will instead disallow
-# all domains.
-#
-#next_link_domain_whitelist: ["matrix.org"]
-
-# Templates to use when generating email or HTML page contents.
-#
-templates:
-  # Directory in which Synapse will try to find template files to use to generate
-  # email or HTML page contents.
-  # If not set, or a file is not found within the template directory, a default
-  # template from within the Synapse package will be used.
-  #
-  # See https://matrix-org.github.io/synapse/latest/templates.html for more
-  # information about using custom templates.
-  #
-  #custom_template_directory: /var/lib/matrix-synapse/res/templates/
 
 
 ## TLS ##
@@ -769,6 +798,8 @@ caches:
   # variable would be `SYNAPSE_CACHE_FACTOR_STATEGROUPCACHE=2.0`.
   #
   per_cache_factors:
+    get_users_in_room: 5.0
+    #get_joined_profile_from_event_id: 5.0
     #get_users_who_share_room_with_user: 2.0
 
   # Controls how long an entry can be in a cache without having been
@@ -816,7 +847,7 @@ database:
   txn_limit: 10000
   args:
     user: matrix
-    password: password
+    password: xxx
     database: matrix
     host: localhost
     cp_min: 5
@@ -844,6 +875,8 @@ log_config: "/etc/matrix-synapse/log.yaml"
 #     is using
 #   - one for registration that ratelimits registration requests based on the
 #     client's IP address.
+#   - one for checking the validity of registration tokens that ratelimits
+#     requests based on the client's IP address.
 #   - one for login that ratelimits login requests based on the client's IP
 #     address.
 #   - one for login that ratelimits login requests based on the account the
@@ -871,6 +904,10 @@ log_config: "/etc/matrix-synapse/log.yaml"
 #rc_registration:
 #  per_second: 0.17
 #  burst_count: 3
+#
+#rc_registration_token_validity:
+#  per_second: 0.1
+#  burst_count: 5
 #
 #rc_login:
 #  address:
@@ -1024,6 +1061,8 @@ media_store_path: "/var/lib/matrix-synapse/media"
 # This must be specified if url_preview_enabled is set. It is recommended that
 # you uncomment the following list as a starting point.
 #
+# Note: The value is ignored when an HTTP proxy is in use
+#
 #url_preview_ip_range_blacklist:
 #  - '127.0.0.0/8'
 #  - '10.0.0.0/8'
@@ -1118,6 +1157,27 @@ url_preview_accept_language:
 #   - en
 
 
+# oEmbed allows for easier embedding content from a website. It can be
+# used for generating URLs previews of services which support it.
+#
+oembed:
+  # A default list of oEmbed providers is included with Synapse.
+  #
+  # Uncomment the following to disable using these default oEmbed URLs.
+  # Defaults to 'false'.
+  #
+  #disable_default_providers: true
+
+  # Additional files with oEmbed configuration (each should be in the
+  # form of providers.json).
+  #
+  # By default, this list is empty (so only the default providers.json
+  # is used).
+  #
+  #additional_providers:
+  #  - oembed/my_providers.json
+
+
 ## Captcha ##
 # See docs/CAPTCHA_SETUP.md for full details of configuring this.
 
@@ -1156,7 +1216,7 @@ turn_uris: [
 
 # The shared secret used to compute passwords for the TURN server
 #
-turn_shared_secret: "mysecret"
+turn_shared_secret: "xxx"
 
 # The Username and password if the TURN server needs them and
 # does not use a token
@@ -1197,6 +1257,44 @@ enable_registration: true
 #
 #session_lifetime: 24h
 
+# Time that an access token remains valid for, if the session is
+# using refresh tokens.
+# For more information about refresh tokens, please see the manual.
+# Note that this only applies to clients which advertise support for
+# refresh tokens.
+#
+# Note also that this is calculated at login time and refresh time:
+# changes are not applied to existing sessions until they are refreshed.
+#
+# By default, this is 5 minutes.
+#
+#refreshable_access_token_lifetime: 5m
+
+# Time that a refresh token remains valid for (provided that it is not
+# exchanged for another one first).
+# This option can be used to automatically log-out inactive sessions.
+# Please see the manual for more information.
+#
+# Note also that this is calculated at login time and refresh time:
+# changes are not applied to existing sessions until they are refreshed.
+#
+# By default, this is infinite.
+#
+#refresh_token_lifetime: 24h
+
+# Time that an access token remains valid for, if the session is NOT
+# using refresh tokens.
+# Please note that not all clients support refresh tokens, so setting
+# this to a short value may be inconvenient for some users who will
+# then be logged out frequently.
+#
+# Note also that this is calculated at login time: changes are not applied
+# retrospectively to existing sessions for users that have already logged in.
+#
+# By default, this is infinite.
+#
+#nonrefreshable_access_token_lifetime: 24h
+
 # The user must provide all of the below types of 3PID when registering.
 #
 registrations_require_3pid:
@@ -1223,10 +1321,19 @@ registrations_require_3pid:
 #
 #enable_3pid_lookup: true
 
+# Require users to submit a token during registration.
+# Tokens can be managed using the admin API:
+# https://matrix-org.github.io/synapse/latest/usage/administration/admin_api/registration_tokens.html
+# Note that `enable_registration` must be set to `true`.
+# Disabling this option will not delete any tokens previously generated.
+# Defaults to false. Uncomment the following to require tokens:
+#
+#registration_requires_token: true
+
 # If set, allows registration of standard or admin accounts by anyone who
 # has the shared secret, even if registration is otherwise disabled.
 #
-registration_shared_secret: asecret
+registration_shared_secret: xxx
 
 # Set the number of bcrypt rounds used to generate password hash.
 # Larger numbers increase the work factor needed to generate the hash.
@@ -1246,7 +1353,7 @@ allow_guest_access: false
 # in on this server.
 #
 # (By default, no suggestion is made, so it is left up to the client.
-# This setting is ignored unless public_baseurl is also set.)
+# This setting is ignored unless public_baseurl is also explicitly set.)
 #
 #default_identity_server: https://matrix.org
 
@@ -1270,8 +1377,6 @@ allow_guest_access: false
 # Servers handling the these requests must answer the `/requestToken` endpoints defined
 # by the Matrix Identity Service API specification:
 # https://matrix.org/docs/spec/identity_service/latest
-#
-# If a delegate is specified, the config option public_baseurl must also be filled out.
 #
 account_threepid_delegates:
     #email: https://example.com     # Delegate email sending to example.com
@@ -1449,8 +1554,8 @@ room_prejoin_state:
 
 # A list of application service config files to use
 #
-app_service_config_files:
-  - "/opt/matrix-appservice-irc/appservice-registration-irc.yaml"
+#app_service_config_files:
+##  - "/opt/matrix-appservice-irc/appservice-registration-irc.yaml"
 
 # Uncomment to enable tracking of application service IP addresses. Implicitly
 # enables MAU tracking for application service users.
@@ -1462,13 +1567,13 @@ app_service_config_files:
 # the registration_shared_secret is used, if one is given; otherwise,
 # a secret key is derived from the signing key.
 #
-macaroon_secret_key: "secret"
+macaroon_secret_key: "xxx"
 
 # a secret which is used to calculate HMACs for form values, to stop
 # falsification of values. Must be specified for the User Consent
 # forms to work.
 #
-form_secret: "secret"
+form_secret: "xxx"
 
 ## Signing Keys ##
 
@@ -1962,11 +2067,10 @@ sso:
     # phishing attacks from evil.site. To avoid this, include a slash after the
     # hostname: "https://my.client/".
     #
-    # If public_baseurl is set, then the login fallback page (used by clients
-    # that don't natively support the required login flows) is whitelisted in
-    # addition to any URLs in this list.
+    # The login fallback page (used by clients that don't natively support the
+    # required login flows) is whitelisted in addition to any URLs in this list.
     #
-    # By default, this list is empty.
+    # By default, this list contains only the login fallback page.
     #
     #client_whitelist:
     #  - https://riot.im/develop
@@ -2020,6 +2124,12 @@ sso:
     # Required if 'enabled' is true.
     #
     #algorithm: "provided-by-your-issuer"
+
+    # Name of the claim containing a unique identifier for the user.
+    #
+    # Optional, defaults to `sub`.
+    #
+    #subject_claim: "sub"
 
     # The issuer to validate the "iss" claim against.
     #
@@ -2086,7 +2196,7 @@ password_config:
       #
       #require_lowercase: true
 
-      # Whether a password must contain at least one lowercase letter.
+      # Whether a password must contain at least one uppercase letter.
       # Defaults to 'false'.
       #
       #require_uppercase: true
@@ -2190,7 +2300,7 @@ email:
   # to the identity server as the org.matrix.web_client_location key. Defaults
   # to unset, giving no guidance to the identity server.
   #
-  #invite_client_location: https://app.element.io
+  #invite_client_location: https://element.envs.net
 
   # Subjects to use when sending emails from Synapse.
   #
@@ -2260,35 +2370,6 @@ email:
     #email_validation: "[%(server_name)s] Validate your email"
 
 
-# Password providers allow homeserver administrators to integrate
-# their Synapse installation with existing authentication methods
-# ex. LDAP, external tokens, etc.
-#
-# For more information and known implementations, please see
-# https://matrix-org.github.io/synapse/latest/password_auth_providers.html
-#
-# Note: instances wishing to use SAML or CAS authentication should
-# instead use the `saml2_config` or `cas_config` options,
-# respectively.
-#
-password_providers:
-#    # Example config for an LDAP auth provider
-#    - module: "ldap_auth_provider.LdapAuthProvider"
-#      config:
-#        enabled: true
-#        uri: "ldap://ldap.example.com:389"
-#        start_tls: true
-#        base: "ou=users,dc=example,dc=com"
-#        attributes:
-#           uid: "cn"
-#           mail: "email"
-#           name: "givenName"
-#        #bind_dn:
-#        #bind_password:
-#        #filter: "(objectClass=posixAccount)"
-
-
-
 ## Push ##
 
 push:
@@ -2349,6 +2430,8 @@ enable_group_creation: true
 #
 #group_creation_prefix: "unofficial_"
 
+
+
 # User Directory configuration
 #
 user_directory:
@@ -2360,13 +2443,17 @@ user_directory:
     enabled: true
 
     # Defines whether to search all users visible to your HS when searching
-    # the user directory, rather than limiting to users visible in public
-    # rooms. Defaults to false.
+    # the user directory. If false, search results will only contain users
+    # visible in public rooms and users sharing a room with the requester.
+    # Defaults to false.
     #
-    # If you set it true, you'll have to rebuild the user_directory search
-    # indexes, see:
-    # https://matrix-org.github.io/synapse/latest/user_directory.html
-    #
+    # NB. If you set this to true, and the last time the user_directory search
+    # indexes were (re)built was before Synapse 1.44, you'll have to
+    # rebuild the indexes in order to search through all known users.
+    # These indexes are built the first time Synapse starts; admins can
+    # manually trigger a rebuild via API following the instructions at
+    #     https://matrix-org.github.io/synapse/latest/usage/administration/admin_api/background_updates.html#run
+    #   
     # Uncomment to return search results containing all known users, even if that
     # user does not share a room with the requester.
     #
@@ -2443,11 +2530,6 @@ stats:
   # correctly.
   #
   enabled: true
-
-  # The size of each timeslice in the room_stats_historical and
-  # user_stats_historical tables, as a time period. Defaults to "1d".
-  #
-  bucket_size: 1d
 
 
 # Server Notices room configuration

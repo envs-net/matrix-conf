@@ -1,6 +1,6 @@
 [Unit]
 Description=matrix-media-repo
-After=network.target postgresql@13-main.service matrix-synapse.service
+After=network.target postgresql@13-main.service matrix-synapse.service redis-server.service
 
 [Service]
 Type=simple
