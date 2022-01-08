@@ -1,6 +1,8 @@
 [Unit]
 Description=matrix-synchrotron-balancer
-After=network.target matrix-synapse.service
+After=network.target
+Requires=nginx.service
+Requires=matrix-synapse.target
 
 [Service]
 Type=simple

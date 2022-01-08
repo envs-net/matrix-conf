@@ -806,7 +806,7 @@ caches:
   # accessed before being evicted. Defaults to None, which means
   # entries are never evicted based on time.
   #
-  expiry_time: 24h
+  #expiry_time: 24h
 
   # Controls how long the results of a /sync request are cached for after
   # a successful response is returned. A higher duration can help clients with
