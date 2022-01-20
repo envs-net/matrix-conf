@@ -73,13 +73,13 @@ homeservers:
 # sent straight through the client - they are simply used to invalidate the cache faster for
 # a particular user. Without these, the access tokens might still work for a short period of time
 # after the user has already invalidated them.
-# 
+#
 # This will also cache errors from the homeserver.
 #
 # Note that when this config block is used outside of a per-domain config, all hosts will be
 # subject to the same cache. This also means that application services on limited homeservers
 # could be authorized on the wrong domain.
-#   
+#
 # ***************************************************************************
 # *  IT IS HIGHLY RECOMMENDED TO USE PER-DOMAIN CONFIGS WITH THIS FEATURE.  *
 # ***************************************************************************
@@ -174,7 +174,7 @@ datastores:
       # An optional region for where this S3 endpoint is located. Typically not needed, though
       # some providers will need this (like Scaleway). Uncomment to use.
       #region: "sfo2"
-    
+
   # The media repo does support an IPFS datastore, but only if the IPFS feature is enabled. If
   # the feature is not enabled, this will not work. Note that IPFS support is experimental at
   # the moment and not recommended for general use.
@@ -366,7 +366,7 @@ thumbnails:
   # The maximum number of bytes an image can be before the thumbnailer refuses.
   maxSourceBytes: 10485760 # 10MB default, 0 to disable
 
-  # The maximum number of pixels an image can have before the thumbnailer refuses. Note that 
+  # The maximum number of pixels an image can have before the thumbnailer refuses. Note that
   # this only applies to image types: file types like audio and video are affected solely by
   # the maxSourceBytes.
   maxPixels: 96000000 # 32M default
