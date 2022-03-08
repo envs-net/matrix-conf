@@ -246,7 +246,7 @@ uploads:
 # Settings related to downloading files from the media repository
 downloads:
   # The maximum number of bytes to download from other servers
-  maxBytes: 104857600 # 100MB default, 0 to disable
+  maxBytes: 268435456 # 100MB default, 0 to disable
 
   # The number of workers to use when downloading remote media. Raise this number if remote
   # media is downloading slowly or timing out.
