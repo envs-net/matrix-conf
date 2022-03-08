@@ -2783,21 +2783,21 @@ stream_writers:
 #    - generic_worker2
 #    - generic_worker3
 #    - generic_worker4
-  to_device:
-    - generic_worker1
-    - generic_worker2
-    - generic_worker3
-    - generic_worker4
-  account_data:
-    - generic_worker1
-    - generic_worker2
-    - generic_worker3
-    - generic_worker4
-  receipts:
-    - generic_worker1
-    - generic_worker2
-    - generic_worker3
-    - generic_worker4
+#  to_device:
+#    - generic_worker1
+#    - generic_worker2
+#    - generic_worker3
+#    - generic_worker4
+#  account_data:
+#    - generic_worker1
+#    - generic_worker2
+#    - generic_worker3
+#    - generic_worker4
+#  receipts:
+#    - generic_worker1
+#    - generic_worker2
+#    - generic_worker3
+#    - generic_worker4
 #  presence:
 #    - generic_worker1
 #    - generic_worker2
