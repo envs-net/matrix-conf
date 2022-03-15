@@ -1,0 +1,28 @@
+worker_app: synapse.app.generic_worker
+worker_name: additional1
+
+# The replication listener on the synapse to talk to.
+worker_replication_host: 127.0.0.1
+worker_replication_http_port: 9093
+
+worker_log_config: /etc/matrix-synapse/workers/additional1_log_config.yaml
+
+worker_listeners:
+  - type: http
+    bind_addresses: ['127.0.0.1']
+    port: 8514
+    tls: false
+    x_forwarded: true
+    resources:
+      - names: [client, federation]
+        compress: false
+
+  - type: http
+    bind_addresses: ['127.0.0.1']
+    port: 9098
+    resources:
+      - names: [replication]
+
+  - type: metrics
+    bind_addresses: ['0.0.0.0']
+    port: 9135

@@ -2764,6 +2764,12 @@ instance_map:
   generic_worker4:
     host: localhost
     port: 9097
+  additional1:
+    host: localhost
+    port: 9098
+  presence:
+    host: localhost
+    port: 9100
 
 # Experimental: When using workers you can define which workers should
 # handle event persistence and typing notifications. Any worker
@@ -2778,6 +2784,16 @@ stream_writers:
     - generic_worker2
     - generic_worker3
     - generic_worker4
+  typing:
+    - additional1
+  to_device:
+    - additional1
+  account_data:
+    - additional1
+  receipts:
+    - additional1
+  presence:
+    - presence
 
 # The worker that is used to run background tasks (e.g. cleaning up expired
 # data). If not provided this defaults to the main process.

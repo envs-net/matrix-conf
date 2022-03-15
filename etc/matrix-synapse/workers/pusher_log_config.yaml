@@ -21,7 +21,7 @@ handlers:
         formatter: precise
         filename: /var/log/matrix-synapse/worker_pusher.log
         when: midnight
-        backupCount: 3  # Does not include the current log file.
+        backupCount: 2  # Does not include the current log file.
         encoding: utf8
 
     # Default to buffering writes to log file for efficiency.
