@@ -19,7 +19,7 @@ handlers:
     file:
         class: logging.handlers.TimedRotatingFileHandler
         formatter: precise
-        filename: /var/log/matrix-synapse/additional1.log
+        filename: /var/log/matrix-synapse/worker_additional1.log
         when: midnight
         backupCount: 2  # Does not include the current log file.
         encoding: utf8
