@@ -64,12 +64,29 @@ modules:
         - "!WuBtumawCeOGEieRrp:matrix.org"
         # matrix-tos-bl
         - "!tUPwPPmVTaiKXMiijj:matrix.org"
+        # Public Servers Shared Banlist
+        - "!RRGtWzzVKUJmDVRNnZ:aria-net.org"
         # tchncs-ban-list
         - "!hTMIYoLoENZQwslaHP:tchncs.de"
         # asragr-ban-list
         - "!YImXsibeOfGBYVaElT:asra.gr"
         # banlist-spam
         - "!eVqHGneqdbqBDmQwXs:systemtest.tk"
+      #message_max_length:
+         # Limit the characters in a message (event body) that a client can send in an event on this server.
+         # By default there is no limit (beyond the the limit the spec enforces on event size).
+         # Uncomment if you want messages to be limited to 510 characters.
+         #threshold: 510
+         # Limit messages only in certain rooms rooms.
+         # By default all rooms will enforce the limit.
+         # Uncomment if you want messages to only be subject to character limits in certain rooms.
+         #rooms:
+         #  - "!vMvyOCeCxHsggkmALd:localhost:9999"
+         # Also hide messages from remote servers that are over the `message_limit`.
+         # By default only events from this server will be limited.
+         # WARNING: Remote users on other servers will still be able to messages over the limit.
+         # Uncomment to enforce the `message_limit` on events from remote servers.
+         #remote_servers: true
 
 
 ## Server ##
@@ -450,6 +467,11 @@ admin_contact: 'mailto:hostmaster@envs.net'
 # sign up in a short space of time never to return after their initial
 # session.
 #
+# The option `mau_appservice_trial_days` is similar to `mau_trial_days`, but
+# applies a different trial number if the user was registered by an appservice.
+# A value of 0 means no trial days are applied. Appservices not listed in this
+# dictionary use the value of `mau_trial_days` instead.
+#
 # 'mau_limit_alerting' is a means of limiting client side alerting
 # should the mau limit be reached. This is useful for small instances
 # where the admin has 5 mau seats (say) for 5 specific people and no
@@ -460,6 +482,8 @@ admin_contact: 'mailto:hostmaster@envs.net'
 #max_mau_value: 50
 #mau_trial_days: 2
 #mau_limit_alerting: false
+#mau_appservice_trial_days:
+#  "appservice-id": 1
 
 # If enabled, the metrics for the number of monthly active users will
 # be populated, however no one will be limited. If limit_usage_by_mau
@@ -761,11 +785,11 @@ retention:
 #
 #allow_profile_lookup_over_federation: false
 
-# Uncomment to disable device display name lookup over federation. By default, the
-# Federation API allows other homeservers to obtain device display names of any user
-# on this homeserver. Defaults to 'true'.
+# Uncomment to allow device display name lookup over federation. By default, the
+# Federation API prevents other homeservers from obtaining the display names of
+# user devices on this homeserver. Defaults to 'false'.
 #
-#allow_device_name_lookup_over_federation: false
+#allow_device_name_lookup_over_federation: true
 
 
 ## Caching ##
@@ -2722,9 +2746,9 @@ opentracing:
 worker_app: synapse.app.homeserver
 #worker_name: synapse
 
-notify_appservices: false
+#notify_appservices_from_worker: worker_name
 start_pushers: false
-#update_user_directory: false
+#update_user_directory_from_worker: worker_name
 
 # Disables sending of outbound federation transactions on the main process.
 # Uncomment if using a federation sender worker.
