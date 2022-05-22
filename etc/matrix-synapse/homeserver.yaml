@@ -66,12 +66,8 @@ modules:
         - "!tUPwPPmVTaiKXMiijj:matrix.org"
         # Public Servers Shared Banlist
         - "!RRGtWzzVKUJmDVRNnZ:aria-net.org"
-        # tchncs-ban-list
-        - "!hTMIYoLoENZQwslaHP:tchncs.de"
         # asragr-ban-list
         - "!YImXsibeOfGBYVaElT:asra.gr"
-        # banlist-spam
-        - "!eVqHGneqdbqBDmQwXs:systemtest.tk"
       #message_max_length:
          # Limit the characters in a message (event body) that a client can send in an event on this server.
          # By default there is no limit (beyond the the limit the spec enforces on event size).
@@ -638,7 +634,7 @@ retention:
   # to these limits when running purge jobs.
   #
   allowed_lifetime_min: 30m
-  allowed_lifetime_max: 3y
+  allowed_lifetime_max: 10y
 
   # Server admins can define the settings of the background jobs purging the
   # events which lifetime has expired under the 'purge_jobs' section.
