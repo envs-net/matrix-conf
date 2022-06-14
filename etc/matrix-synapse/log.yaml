@@ -21,7 +21,7 @@ handlers:
         formatter: precise
         filename: /var/log/matrix-synapse/homeserver.log
         when: midnight
-        backupCount: 3  # Does not include the current log file.
+        backupCount: 2  # Does not include the current log file.
         encoding: utf8
 
     # Default to buffering writes to log file for efficiency.
@@ -64,13 +64,6 @@ loggers:
 
     synapse.state.metrics:
         level: DEBUG
-
-    twisted:
-        # We send the twisted logging directly to the file handler,
-        # to work around https://github.com/matrix-org/synapse/issues/3471
-        # when using "buffer" logger. Use "console" to log to stderr instead.
-        handlers: [file]
-        propagate: false
 
 root:
     level: WARN
