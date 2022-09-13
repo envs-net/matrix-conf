@@ -59,7 +59,7 @@ modules:
       # these rooms.
       ban_lists:
         # EBL
-        - "!UyrSHIwWgbGsHjabGe:envs.net"
+        - "!GGuqmQVLNyWASNjVQw:envs.net"
         # matrix-coc-bl
         - "!WuBtumawCeOGEieRrp:matrix.org"
         # matrix-tos-bl
@@ -68,6 +68,8 @@ modules:
         - "!RRGtWzzVKUJmDVRNnZ:aria-net.org"
         # asragr-ban-list
         - "!YImXsibeOfGBYVaElT:asra.gr"
+        # community-moderation-effort-bl:neko.dev
+        - "!fTjMjIzNKEsFlUIiru:neko.dev"
       #message_max_length:
          # Limit the characters in a message (event body) that a client can send in an event on this server.
          # By default there is no limit (beyond the the limit the spec enforces on event size).
@@ -627,7 +629,7 @@ retention:
   # The message retention policies feature is disabled by default. Uncomment the
   # following line to enable it.
   #
-  enabled: true
+  enabled: false
 
   # Default retention policy. If set, Synapse will apply it to rooms that lack the
   # 'm.room.retention' state event. Currently, the value of 'min_lifetime' doesn't
@@ -814,7 +816,7 @@ retention:
 # The number of events to cache in memory. Not affected by
 # caches.global_factor.
 #
-#event_cache_size: 10K
+#event_cache_size: 15K
 
 caches:
   # Controls the global cache factor, which is the default cache factor
@@ -1452,31 +1454,6 @@ allow_guest_access: false
 # This setting is ignored unless public_baseurl is also explicitly set.)
 #
 #default_identity_server: https://matrix.org
-
-# Handle threepid (email/phone etc) registration and password resets through a set of
-# *trusted* identity servers. Note that this allows the configured identity server to
-# reset passwords for accounts!
-#
-# Be aware that if `email` is not set, and SMTP options have not been
-# configured in the email config block, registration and user password resets via
-# email will be globally disabled.
-#
-# Additionally, if `msisdn` is not set, registration and password resets via msisdn
-# will be disabled regardless, and users will not be able to associate an msisdn
-# identifier to their account. This is due to Synapse currently not supporting
-# any method of sending SMS messages on its own.
-#
-# To enable using an identity server for operations regarding a particular third-party
-# identifier type, set the value to the URL of that identity server as shown in the
-# examples below.
-#
-# Servers handling the these requests must answer the `/requestToken` endpoints defined
-# by the Matrix Identity Service API specification:
-# https://matrix.org/docs/spec/identity_service/latest
-#
-account_threepid_delegates:
-    #email: https://example.com     # Delegate email sending to example.com
-    #msisdn: http://localhost:8090  # Delegate SMS sending to this local process
 
 # Whether users are allowed to change their displayname after it has
 # been initially set. Useful when provisioning users based on the
@@ -2374,6 +2351,8 @@ email:
   # smtp_user: "exampleusername"
   # smtp_pass: "examplepassword"
 
+  #force_tls: true
+
   # Uncomment the following to require TLS transport security for SMTP.
   # By default, Synapse will connect over plain text, and will then switch to
   # TLS via STARTTLS *if the SMTP server supports it*. If this option is set,
@@ -2575,7 +2554,7 @@ push:
 #
 #default_power_level_content_override:
 #    private_chat:
-#        "events":  
+#        "events":
 #            "com.example.myeventtype" : 0
 #            "m.room.avatar": 50
 #            "m.room.canonical_alias": 50
@@ -2610,7 +2589,7 @@ user_directory:
     # These indexes are built the first time Synapse starts; admins can
     # manually trigger a rebuild via API following the instructions at
     #     https://matrix-org.github.io/synapse/latest/usage/administration/admin_api/background_updates.html#run
-    #   
+    #
     # Uncomment to return search results containing all known users, even if that
     # user does not share a room with the requester.
     #
@@ -2965,4 +2944,5 @@ background_updates:
 
 
 experimental_features:
+  msc2815_enabled: true
   msc2285_enabled: true

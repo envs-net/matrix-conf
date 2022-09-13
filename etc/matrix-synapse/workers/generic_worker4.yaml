@@ -5,6 +5,8 @@ worker_name: generic_worker4
 worker_replication_host: 127.0.0.1
 worker_replication_http_port: 9093
 
+worker_main_http_uri: http://localhost:8008/
+
 worker_log_config: /etc/matrix-synapse/workers/generic_worker4_log_config.yaml
 
 worker_listeners:
