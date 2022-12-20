@@ -487,7 +487,7 @@ admin_contact: 'mailto:hostmaster@envs.net'
 # be populated, however no one will be limited. If limit_usage_by_mau
 # is true, this is implied to be true.
 #
-#mau_stats_only: false
+mau_stats_only: true
 
 # Sometimes the server admin will want to ensure certain accounts are
 # never blocked by mau checking. These accounts are specified here.
@@ -2388,12 +2388,12 @@ email:
   # Uncomment the following to enable sending emails for messages that the user
   # has missed. Disabled by default.
   #
-  enable_notifs: true
+  enable_notifs: false
 
   # Uncomment the following to disable automatic subscription to email
   # notifications for new users. Enabled by default.
   #
-  notif_for_new_users: true
+  notif_for_new_users: false
 
   # Custom URL for client links within the email notifications. By default
   # links will be based on "https://matrix.to".
@@ -2554,7 +2554,7 @@ push:
 #
 #default_power_level_content_override:
 #    private_chat:
-#        "events":
+#        "events":  
 #            "com.example.myeventtype" : 0
 #            "m.room.avatar": 50
 #            "m.room.canonical_alias": 50
@@ -2589,7 +2589,7 @@ user_directory:
     # These indexes are built the first time Synapse starts; admins can
     # manually trigger a rebuild via API following the instructions at
     #     https://matrix-org.github.io/synapse/latest/usage/administration/admin_api/background_updates.html#run
-    #
+    #   
     # Uncomment to return search results containing all known users, even if that
     # user does not share a room with the requester.
     #
@@ -2807,13 +2807,10 @@ worker_app: synapse.app.homeserver
 #worker_name: synapse
 
 #notify_appservices_from_worker: worker_name
-start_pushers: false
 #update_user_directory_from_worker: worker_name
 
-# Disables sending of outbound federation transactions on the main process.
-# Uncomment if using a federation sender worker.
-#
-send_federation: false
+pusher_instances:
+  - pusher
 
 # It is possible to run multiple federation sender workers, in which case the
 # work is balanced across them.
@@ -2827,6 +2824,7 @@ federation_sender_instances:
   - federation_sender1
   - federation_sender2
   - federation_sender3
+  - federation_sender4
 
 # When using workers this should be a map from `worker_name` to the
 # HTTP replication listener of the worker, if configured.
@@ -2944,5 +2942,4 @@ background_updates:
 
 
 experimental_features:
-  msc2815_enabled: true
   msc2285_enabled: true

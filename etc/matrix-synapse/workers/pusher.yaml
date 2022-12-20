@@ -1,4 +1,4 @@
-worker_app: synapse.app.pusher
+worker_app: synapse.app.generic_worker
 worker_name: pusher
 
 # The replication listener on the synapse to talk to.
