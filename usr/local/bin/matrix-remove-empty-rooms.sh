@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#
+# this script removed all room's without local members.
 # you dont need to stop synapse.
 #
 
@@ -30,15 +30,14 @@ done
 if [ -z "$DOMAIN" ] || [ "$DOMAIN" == '-t' ]; then print_usage; fi
 if [ -z "$TOKEN" ] || [ "$TOKEN" == '-d' ]; then print_usage; fi
 
-curl -s -X GET -H "Authorization: Bearer $TOKEN" "https://$DOMAIN/_synapse/admin/v1/rooms?limit=10000" | \
-jq -M '.rooms[] | select(.joined_local_members == 0) | .room_id' > $tmp_file
-sed -i 's/"//g' $tmp_file
+curl -s -X GET -H "Authorization: Bearer $TOKEN" "https://$DOMAIN/_synapse/admin/v1/rooms?limit=1000000" | \
+jq -Mr '.rooms[] | select(.joined_local_members == 0) | .room_id' > $tmp_file
 
 while IFS= read -r room_id
 do
     printf 'remove room %s ' "$room_id"
-    curl -s -X POST -H "Authorization: Bearer $TOKEN" "https://$DOMAIN/_synapse/admin/v1/purge_room" \
-    -H "Content-Type: application/json" -d "{ \"room_id\": \"$room_id\" }"
+    curl -s -X DELETE -H "Authorization: Bearer $TOKEN" "https://$DOMAIN/_synapse/admin/v1/rooms/$room_id" \
+    -H "Content-Type: application/json" -d "{}"
     printf ' done.\n'
 done < $tmp_file
 

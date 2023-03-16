@@ -10,7 +10,7 @@
 ## start task via:
 # $ sudo systemd-run --nice=4 -pCPUSchedulingPolicy=batch \
 #   -pIOSchedulingClass=idle --uid=matrix-synapse --collect \
-#   --unit=synapse-clear-state ~/bin/synapse-clear-state
+#   --unit=synapse-clear-state ~/bin/synapse_clear_state
 #
 ## watch task-log via:
 # $ journalctl -Stoday -u synapse-clear-state -f
@@ -20,7 +20,6 @@ set -e -u
 
 username='matrix'
 db='matrix'
-
 conn_str="host=localhost user=$username dbname=$db application_name=state_compress"
 
 ###
@@ -56,7 +55,7 @@ do
         sql_file=state-compress-$((no += 1)).sql
         echo "Writing SQL commands to $sql_file"
 
-        $time synapse-compress-state -t -p "$conn_str" -o "$sql_file" -r "$room" -m 1000
+        $time synapse_compress_state -t -p "$conn_str" -o "$sql_file" -r "$room" -m 1000
         if test -s "$sql_file"
         then
                 $time psql -X -q -b -U "$username" -c '\set ON_ERROR_STOP on' -f "$sql_file" $db
