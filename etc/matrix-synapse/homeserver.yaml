@@ -2834,6 +2834,9 @@ federation_sender_instances:
 #    host: localhost
 #    port: 8034
 instance_map:
+  main:
+    host: localhost
+    port: 9093
   generic_worker1:
     host: localhost
     port: 9094
