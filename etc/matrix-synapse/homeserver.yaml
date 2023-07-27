@@ -848,6 +848,7 @@ caches:
   #
   per_cache_factors:
     get_users_in_room: 5.0
+    get_current_hosts_in_room: 5.0
     #get_joined_profile_from_event_id: 5.0
     #get_users_who_share_room_with_user: 2.0
 
