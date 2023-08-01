@@ -9,5 +9,7 @@ synchrotrons:
     pid_file: /etc/matrix-synapse/workers/generic_worker3.pid
   - address: localhost:8513
     pid_file: /etc/matrix-synapse/workers/generic_worker4.pid
+  - address: localhost:8514
+    pid_file: /etc/matrix-synapse/workers/generic_worker5.pid
 balancer:
   interval: 2

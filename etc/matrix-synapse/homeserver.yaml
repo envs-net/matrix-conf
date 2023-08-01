@@ -2850,9 +2850,12 @@ instance_map:
   generic_worker4:
     host: localhost
     port: 9097
-  additional1:
+  generic_worker5:
     host: localhost
     port: 9098
+  additional1:
+    host: localhost
+    port: 9099
   presence:
     host: localhost
     port: 9100
@@ -2870,6 +2873,7 @@ stream_writers:
     - generic_worker2
     - generic_worker3
     - generic_worker4
+    - generic_worker5
   typing:
     - additional1
   to_device:

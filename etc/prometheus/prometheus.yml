@@ -74,19 +74,19 @@ scrape_configs:
           group: synapse
           worker: federation_sender3
 
+      - targets: ['matrix.envs.net:9104']
+        labels:
+          job: federation_sender
+          instance: All
+          group: synapse
+          worker: federation_sender4
+
       - targets: ['matrix.envs.net:9111']
         labels:
           job: pusher
           instance: All
           group: synapse
           worker: pusher
-
-      - targets: ['matrix.envs.net:9121']
-        labels:
-          job: appservice
-          instance: All
-          group: synapse
-          worker: appservice
 
       - targets: ['matrix.envs.net:9131']
         labels:
@@ -115,6 +115,27 @@ scrape_configs:
           instance: All
           group: synapse
           worker: generic_worker4
+
+      - targets: ['matrix.envs.net:9135']
+        labels:
+          job: generic_worker
+          instance: All
+          group: synapse
+          worker: generic_worker5
+
+      - targets: ['matrix.envs.net:9136']
+        labels:
+          job: additional
+          instance: All
+          group: synapse
+          worker: additional1
+
+      - targets: ['matrix.envs.net:9137']
+        labels:
+          job: presence
+          instance: All
+          group: synapse
+          worker: presence
 
   - job_name: 'media-repo'
     metrics_path: '/metrics'

@@ -1,12 +1,12 @@
 worker_app: synapse.app.generic_worker
-worker_name: additional1
+worker_name: generic_worker5
 
-worker_log_config: /etc/matrix-synapse/workers/additional1_log_config.yaml
+worker_log_config: /etc/matrix-synapse/workers/generic_worker5_log_config.yaml
 
 worker_listeners:
   - type: http
     bind_addresses: ['127.0.0.1']
-    port: 8515
+    port: 8514
     tls: false
     x_forwarded: true
     resources:
@@ -15,10 +15,10 @@ worker_listeners:
 
   - type: http
     bind_addresses: ['127.0.0.1']
-    port: 9099
+    port: 9098
     resources:
       - names: [replication]
 
   - type: metrics
     bind_addresses: ['0.0.0.0']
-    port: 9136
+    port: 9135
