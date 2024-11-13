@@ -160,7 +160,7 @@ presence:
   # Uncomment to disable presence tracking on this homeserver. This option
   # replaces the previous top-level 'use_presence' option.
   #
-  enabled: true
+  enabled: false
 
 # Whether to require authentication to retrieve profile data (avatars,
 # display names) of other users through the client API. Defaults to
@@ -203,7 +203,7 @@ allow_public_rooms_over_federation: true
 # For example, for room version 1, default_room_version should be set
 # to "1".
 #
-#default_room_version: "9"
+#default_room_version: "10"
 
 # The GC threshold parameters to pass to `gc.set_threshold`, if defined
 #
@@ -928,7 +928,7 @@ database:
     user: matrix
     password: xxx
     database: matrix
-    host: localhost
+    host: 127.0.0.1
     cp_min: 5
     cp_max: 10
 
@@ -2555,7 +2555,7 @@ push:
 #
 #default_power_level_content_override:
 #    private_chat:
-#        "events":  
+#        "events":
 #            "com.example.myeventtype" : 0
 #            "m.room.avatar": 50
 #            "m.room.canonical_alias": 50
@@ -2590,7 +2590,7 @@ user_directory:
     # These indexes are built the first time Synapse starts; admins can
     # manually trigger a rebuild via API following the instructions at
     #     https://matrix-org.github.io/synapse/latest/usage/administration/admin_api/background_updates.html#run
-    #   
+    #
     # Uncomment to return search results containing all known users, even if that
     # user does not share a room with the requester.
     #
@@ -2687,7 +2687,9 @@ server_notices:
   system_mxid_display_name: "Server Notices"
   system_mxid_avatar_url: "mxc://envs.net/83c0eed9ea5cf72417cc20b5e3b5fb01aa0c3967"
   room_name: "Server Notices"
-
+  room_avatar_url: "mxc://envs.net/83c0eed9ea5cf72417cc20b5e3b5fb01aa0c3967"
+  room_topic: "room used by your server admin to notice you of important information"
+  auto_join: true
 
 
 # Uncomment to disable searching the public room list. When disabled
@@ -2810,6 +2812,7 @@ worker_app: synapse.app.homeserver
 #notify_appservices_from_worker: worker_name
 #update_user_directory_from_worker: worker_name
 
+start_pushers: false
 pusher_instances:
   - pusher
 
@@ -2821,6 +2824,7 @@ pusher_instances:
 # started, to ensure that all instances are running with the same config (otherwise
 # events may be dropped).
 #
+send_federation: false
 federation_sender_instances:
   - federation_sender1
   - federation_sender2
@@ -2830,50 +2834,39 @@ federation_sender_instances:
 # When using workers this should be a map from `worker_name` to the
 # HTTP replication listener of the worker, if configured.
 #
-#instance_map:
-#  worker1:
-#    host: localhost
-#    port: 8034
 instance_map:
   main:
-    host: localhost
+    host: 127.0.0.1
     port: 9093
   generic_worker1:
-    host: localhost
+    host: 127.0.0.1
     port: 9094
   generic_worker2:
-    host: localhost
+    host: 127.0.0.1
     port: 9095
   generic_worker3:
-    host: localhost
+    host: 127.0.0.1
     port: 9096
   generic_worker4:
-    host: localhost
+    host: 127.0.0.1
     port: 9097
-  generic_worker5:
-    host: localhost
-    port: 9098
   additional1:
-    host: localhost
+    host: 127.0.0.1
     port: 9099
   presence:
-    host: localhost
+    host: 127.0.0.1
     port: 9100
 
 # Experimental: When using workers you can define which workers should
 # handle event persistence and typing notifications. Any worker
 # specified here must also be in the `instance_map`.
 #
-#stream_writers:
-#  events: worker1
-#  typing: worker1
 stream_writers:
   events:
     - generic_worker1
     - generic_worker2
     - generic_worker3
     - generic_worker4
-    - generic_worker5
   typing:
     - additional1
   to_device:
@@ -2909,13 +2902,12 @@ redis:
   # Optional host and port to use to connect to redis. Defaults to
   # localhost and 6379
   #
-  #host: localhost
-  #port: 6379
+  host: 127.0.0.1
+  port: 6379
 
   # Optional password if configured on the Redis instance
   #
   #password: <secret_password>
-
 
 ## Background Updates ##
 
@@ -2951,3 +2943,4 @@ background_updates:
 
 experimental_features:
   msc2285_enabled: true
+  msc2815_enabled: true

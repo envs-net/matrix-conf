@@ -19,6 +19,11 @@ repo:
   # incompatible with the log color option and will always render without colors.
   jsonLogs: false
 
+  # The log level to log at. Note that this will need to be at least "info" to receive support.
+  #
+  # Values (in increasing spam): panic | fatal | error | warn | info | debug | trace
+  logLevel: "warn"
+
   # If true, the media repo will accept any X-Forwarded-For header without validation. In most cases
   # this option should be left as "false". Note that the media repo already expects an X-Forwarded-For
   # header, but validates it to ensure the IP being given makes sense.
@@ -26,8 +31,19 @@ repo:
 
   # If false, the media repo will not use the X-Forwarded-Host header commonly added by reverse proxies.
   # Typically this should remain as true, though in some circumstances it may need to be disabled.
-  # See https://github.com/turt2live/matrix-media-repo/issues/202 for more information.
+  # See https://github.com/t2bot/matrix-media-repo/issues/202 for more information.
   useForwardedHost: true
+
+  # If true, media uploaded or cached from that point forwards will require authentication in order to
+  # be accessed. Media uploaded or cached prior will remain accessible on the unauthenticated endpoints.
+  # If set to false after being set to true, media uploaded or cached while the flag was true will still
+  # only be accessible over authenticated endpoints, though future media will be accessible on both
+  # authenticated and unauthenticated media.
+  #
+  # This flag currently defaults to false. A future release, likely in August 2024, will remove this flag
+  # and have the same effect as it being true (always on). This flag is primarily intended for servers to
+  # opt-in to the behaviour early.
+  freezeUnauthenticatedMedia: false
 
 # Options for dealing with federation
 federation:
@@ -35,6 +51,18 @@ federation:
   # media repo will back off. This defaults to 20 if not given. Note that 404 errors from
   # the remote server do not count towards this.
   backoffAt: 20
+
+  # The domains the media repo should never serve media for. Existing media already stored from
+  # these domains will remain, however will not be downloadable without a data export. Media
+  # repo administrators will bypass this check. Admin APIs will still work for media on these
+  # domains.
+  #
+  # This will not prevent the listed domains from accessing media on this media repo - it only
+  # stops users on *this* media repo from accessing media originally uploaded to the listed domains.
+  #
+  # Note: Adding domains controlled by the media repo itself to this list is not advisable.
+  ignoredHosts:
+    - example.org
 
 # The database configuration for the media repository
 # Do NOT put your homeserver's existing database credentials here. Create a new database and
@@ -56,16 +84,29 @@ database:
 # The configuration for the homeservers this media repository is known to control. Servers
 # not listed here will not be able to upload media.
 homeservers:
-  - name: envs.net # This should match the server_name of your homeserver, and the Host header
-                      # provided to the media repo.
-    csApi: "https://matrix.envs.net/" # The base URL to where the homeserver can actually be reached
-    backoffAt: 10 # The number of consecutive failures in calling this homeserver before the
-                  # media repository will start backing off. This defaults to 10 if not given.
-    adminApiKind: "matrix" # The kind of admin API the homeserver supports. If set to "matrix",
-                           # the media repo will use the Synapse-defined endpoints under the
-                           # unstable client-server API. When this is "synapse", the new /_synapse
-                           # endpoints will be used instead. Unknown values are treated as the
-                           # default, "matrix".
+  - # Keep the dash from this line.
+
+    # This should match the server_name of your homeserver, and the Host header
+    # provided to the media repo.
+    name: envs.net
+
+    # The base URL to where the homeserver can actually be reached by MMR.
+    csApi: "https://matrix.envs.net/"
+
+    # The number of consecutive failures in calling this homeserver before the
+    # media repository will start backing off. This defaults to 10 if not given.
+    backoffAt: 10
+
+    # The admin API interface supported by the homeserver. MMR uses a subset of the admin API
+    # during certain operations, like attempting to purge media from a room or validating server
+    # admin status. This should be set to one of "synapse", "dendrite", or "matrix". When set
+    # to "matrix", most functionality requiring the admin API will not work.
+    adminApiKind: "synapse"
+
+    # The signing key to use for authorizing outbound federation requests. If not specified,
+    # requests will not be authorized. See https://docs.t2bot.io/matrix-media-repo/v1.3.5/installation/signing-key/
+    # for details.
+    signingKeyPath: "/etc/matrix-media-repo/mmr.signing.key"
 
 # Options for controlling how access tokens work with the media repo. It is recommended that if
 # you are going to use these options that the `/logout` and `/logout/all` client-server endpoints
@@ -137,7 +178,7 @@ sharedSecretAuth:
 # for a datastore to use, will always use the smallest datastore first.
 datastores:
   - type: file
-    enabled: true
+    id: "b2ca79fa0b75955e59e52d2286a30f4c8e053d72"
     # Datastores can be split into many areas when handling uploads. Media is still de-duplicated
     # across all datastores (local content which duplicates remote content will re-use the remote
     # content's location). This option is useful if your datastore is becoming very large, or if
@@ -151,43 +192,6 @@ datastores:
     forKinds: ["all"]
     opts:
       path: /var/matrix-media
-#  - type: file
-#    enabled: true
-    #forKinds: ["all"]
-#    opts:
-#      path: /var/matrix/media
-
-  - type: s3
-    enabled: false # Enable this to set up s3 uploads
-    forKinds: ["thumbnails", "remote_media", "local_media", "archives"]
-    opts:
-      # The s3 uploader needs a temporary location to buffer files to reduce memory usage on
-      # small file uploads. If the file size is unknown, the file is written to this location
-      # before being uploaded to s3 (then the file is deleted). If you aren't concerned about
-      # memory usage, set this to an empty string.
-      tempPath: "/tmp/mediarepo_s3_upload"
-      endpoint: sfo2.digitaloceanspaces.com
-      accessKeyId: ""
-      accessSecret: ""
-      ssl: true
-      bucketName: "your-media-bucket"
-      # An optional region for where this S3 endpoint is located. Typically not needed, though
-      # some providers will need this (like Scaleway). Uncomment to use.
-      #region: "sfo2"
-
-  # The media repo does support an IPFS datastore, but only if the IPFS feature is enabled. If
-  # the feature is not enabled, this will not work. Note that IPFS support is experimental at
-  # the moment and not recommended for general use.
-  #
-  # NOTE: Everything you upload to IPFS will be publicly accessible, even when the media repo
-  # puts authentication on the download endpoints. Only use this option for cases where you
-  # expect your media to be publicly accessible.
-  - type: ipfs
-    enabled: false
-    forKinds: ["local_media"]
-    # The IPFS datastore currently has no options. It will use the daemon or HTTP API configured
-    # in the IPFS section of your main config.
-    opts: {}
 
 # Options for controlling archives. Archives are exports of a particular user's content for
 # the purpose of GDPR or moving media to a different server.
@@ -224,29 +228,49 @@ uploads:
   # Set this to -1 to indicate that there is no limit. Zero will force the use of maxBytes.
   #reportedMaxBytes: 104857600
 
+  # The number of pending uploads a user is permitted to have at a given time. They must cancel,
+  # complete, or otherwise let pending requests expire before uploading any more media. Set to
+  # zero to disable.
+  maxPending: 5
+
+  # The duration the server will wait to receive media that was asynchronously uploaded before
+  # expiring it entirely. This should be set sufficiently high for a client on poor connectivity
+  # to upload something. The Matrix specification recommends 24 hours (86400 seconds), however
+  # this project recommends 30 minutes (1800 seconds).
+  maxAgeSeconds: 1800
+
   # Options for limiting how much content a user can upload. Quotas are applied to content
   # associated with a user regardless of de-duplication. Quotas which affect remote servers
   # or users will not take effect. When a user exceeds their quota they will be unable to
   # upload any more media.
   quotas:
-    # Whether or not quotas are enabled/enforced. Note that even when disabled the media repo
-    # will track how much media a user has uploaded. This is disabled by default.
+    # Whether quotas are enabled/enforced. Note that even when disabled the media repo will
+    # track how much media a user has uploaded. Quotas are disabled by default.
     enabled: false
 
-    # The quota rules that affect users. The first rule to match the uploader will take effect.
-    # An implied rule which matches all users and has no quota is always last in this list,
-    # meaning that if no rules are supplied then users will be able to upload anything. Similarly,
-    # if no rules match a user then the implied rule will match, allowing the user to have no
-    # quota. The quota will let the user upload to 1 media past their quota, meaning that from
-    # a statistics perspective the user might exceed their quota however only by a small amount.
+    # The upload quota rules which affect users. The first rule to match the user ID will take
+    # effect. If a user does not match a rule, the defaults implied by the above config will
+    # take effect instead. The user will not be permitted to upload anything above these quota
+    # values, but can match them exactly.
     users:
       - glob: "@*:*"  # Affect all users. Use asterisks (*) to match any character.
-        maxBytes: 53687063712 # 50GB default, 0 to disable
+        # The maximum number of TOTAL bytes a user can upload. Defaults to zero (no limit).
+        maxBytes: 53687063712 # 50gb
+        # The same as maxPending above - the number of uploads the user can have waiting to
+        # complete before starting another one. Defaults to maxPending above. Set to 0 to
+        # disable.
+        maxPending: 5
+        # The maximum number of uploaded files a user can have. Defaults to zero (no limit).
+        # If both maxBytes and maxFiles are in use then the first condition a user triggers
+        # will prevent upload. Note that a user can still have uploads contributing to maxPending,
+        # but will not be able to complete them if they are at maxFiles.
+        maxFiles: 0
 
 # Settings related to downloading files from the media repository
 downloads:
   # The maximum number of bytes to download from other servers
-  maxBytes: 268435456 # 100MB default, 0 to disable
+  #maxBytes: 104857600 # 100MB default, 0 to disable
+  maxBytes: 268435456 # 256
 
   # The number of workers to use when downloading remote media. Raise this number if remote
   # media is downloading slowly or timing out.
@@ -259,42 +283,16 @@ downloads:
   # has passed, the media is able to be re-requested.
   failureCacheMinutes: 5
 
-  # The cache control settings for downloads. This can help speed up downloads for users by
-  # keeping popular media in the cache. This cache is also used for thumbnails.
-  cache:
-    enabled: false
-
-    # The maximum size of cache to have. Higher numbers are better.
-    maxSizeBytes: 1048576000 # 1GB default
-
-    # The maximum file size to cache. This should normally be the same size as your maximum
-    # upload size.
-    maxFileSizeBytes: 104857600 # 100MB default
-
-    # The number of minutes to track how many downloads a file gets
-    trackedMinutes: 30
-
-    # The number of downloads a file must receive in the window above (trackedMinutes) in
-    # order to be cached.
-    minDownloads: 5
-
-    # The minimum amount of time an item should remain in the cache. This prevents the cache
-    # from cycling out the file if it needs more room during this time. Note that the media
-    # repo regularly cleans out media which is past this point from the cache, so this number
-    # may need increasing depending on your use case. If the maxSizeBytes is reached for the
-    # media repo, and some cached items are still under this timer, new items will not be able
-    # to enter the cache. When this happens, consider raising maxSizeBytes or lowering this
-    # timer.
-    minCacheTimeSeconds: 300
-
-    # The minimum amount of time an item should remain outside the cache once it is removed.
-    minEvictedTimeSeconds: 60
-
   # How many days after a piece of remote content is downloaded before it expires. It can be
   # re-downloaded on demand, this just helps free up space in your datastore. Set to zero or
   # negative to disable. Defaults to disabled.
   expireAfterDays: 90
 
+  # The default size, in bytes, to return for range requests on media. Range requests are used
+  # by clients when they only need part of a file, such as a video or audio element. Note that
+  # the entire file will still be cached (if enabled), but only part of it will be returned.
+  # If the client requests a larger or smaller range, that will be honoured.
+  defaultRangeChunkSizeBytes: 10485760 # 10MB default
 
 # URL Preview settings
 urlPreviews:
@@ -341,7 +339,7 @@ urlPreviews:
     - 'fe80::/64'
     - 'fc00::/7'
   allowedNetworks:
-    - "0.0.0.0/0" # "Everything". The blacklist will help limit this.
+    - "0.0.0.0/0" # "Everything". The deny list will help limit this.
                   # This is the default value for this field.
 
   # How many days after a preview is generated before it expires and is deleted. The preview
@@ -354,7 +352,10 @@ urlPreviews:
   # Reference: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Language
   defaultLanguage: "en-US,en"
 
-  # When true, oEmbed previews will be enabled. Typically these kinds of previews are used for
+  # Set the User-Agent header to supply when generating URL previews
+  userAgent: "matrix-media-repo"
+
+  # When true, oEmbed previews will be enabled. Typically, these kinds of previews are used for
   # sites that do not support OpenGraph or page scraping, such as Twitter. For information on
   # specifying providers for oEmbed, including your own, see the following documentation:
   # https://docs.t2bot.io/matrix-media-repo/url-previews/oembed.html
@@ -370,7 +371,6 @@ thumbnails:
   # this only applies to image types: file types like audio and video are affected solely by
   # the maxSourceBytes.
   maxPixels: 96000000 # 32M default
-  #maxPixels: 0
 
   # The number of workers to use when generating thumbnails. Raise this number if thumbnails
   # are slow to generate or timing out.
@@ -412,7 +412,10 @@ thumbnails:
     - "image/apng"
     - "image/gif"
     - "image/heif"
+    - "image/heic"
     - "image/webp"
+    - "image/bmp"
+    - "image/tiff"
     - "image/svg+xml" # Be sure to have ImageMagick installed to thumbnail SVG files
     - "audio/mpeg"
     - "audio/ogg"
@@ -452,6 +455,30 @@ rateLimit:
   # The number of requests an IP can send at once before the rate limit is actually considered.
   burst: 10
 
+  # The 'leaky bucket' configurations for MMR. Leaky buckets are limited in size and have a slow
+  # drain rate, minimizing the ability for a user to consume large amounts of resources.
+  #
+  # Buckets are checked and applied after the requests per second configuration above. Buckets are
+  # disabled when rate limiting is disabled.
+  #
+  # Note: buckets are *not* shared across processes. If download requests could end up at two different
+  # processes, two different buckets may be filled. This behaviour may change in the future.
+  buckets:
+    # The download bucket applies to both download requests and thumbnail requests. Each anonymous
+    # user is assigned a single bucket from their IP address. Authenticated requests (when supported)
+    # will use the authenticated entity as the subject - either a user or remote server.
+    downloads:
+      # The maximum size of each bucket.
+      capacityBytes: 524288000 # 500mb default
+      # The number of bytes to "drain" from the bucket every minute.
+      drainBytesPerMinute: 5242880 # 5mb default
+      # The number of bytes a requester can go over the capacity, once. This is used to give some
+      # buffer to allow a single file to be downloaded when the caller is near the limit. This
+      # should be set to either your max remote download size or 30% of the capacityBytes, whichever
+      # is smaller.
+      overflowLimitBytes: 268435456 # 100mb default (the same as the default remote download maxBytes)
+
+
 # Identicons are generated avatars for a given username. Some clients use these to give users a
 # default avatar after signing up. Identicons are not part of the official matrix spec, therefore
 # this feature is completely optional.
@@ -472,6 +499,7 @@ quarantine:
   replaceDownloads: false
 
   # If provided, the given image will be returned as a thumbnail for media that is quarantined.
+  # The recommended size is at least 512x512.
   #thumbnailPath: "/path/to/thumbnail.png"
 
   # If true, administrators of the configured homeservers may quarantine media for their server
@@ -483,7 +511,7 @@ quarantine:
 timeouts:
   # The maximum amount of time the media repo should spend trying to fetch a resource that is
   # being previewed.
-  urlPreviewTimeoutSeconds: 10
+  urlPreviewTimeoutSeconds: 30
 
   # The maximum amount of time the media repo will spend making remote requests to other repos
   # or homeservers. This is primarily used to download media.
@@ -495,7 +523,7 @@ timeouts:
 
 # Prometheus metrics configuration
 # For an example Grafana dashboard, import the following JSON:
-# https://github.com/turt2live/matrix-media-repo/blob/master/docs/grafana.json
+# https://github.com/t2bot/matrix-media-repo/blob/main/docs/grafana.json
 metrics:
   # If true, the bindAddress and port below will serve GET /metrics for Prometheus to scrape.
   enabled: true
@@ -510,45 +538,7 @@ metrics:
 # Sections of this config might disappear or be added over time. By default all
 # features are disabled in here and must be explicitly enabled to be used.
 featureSupport:
-  # MSC2248 - Blurhash
-  MSC2448:
-    # Whether or not this MSC is enabled for use in the media repo
-    enabled: false
-
-    # Maximum dimensions for converting a blurhash to an image. When no width and
-    # height options are supplied, the default will be half these values.
-    maxWidth: 1024
-    maxHeight: 1024
-
-    # Thumbnail size in pixels to use to generate the blurhash string
-    thumbWidth: 64
-    thumbHeight: 64
-
-    # The X and Y components to use. Higher numbers blur less, lower numbers blur more.
-    xComponents: 4
-    yComponents: 3
-
-    # The amount of contrast to apply when converting a blurhash to an image. Lower values
-    # make the effect more subtle, larger values make it stronger.
-    punch: 1
-
-  # IPFS Support
-  # This is currently experimental and might not work at all.
-  IPFS:
-    # Whether or not IPFS support is enabled for use in the media repo.
-    enabled: false
-
-    # Options for the built in IPFS daemon
-    builtInDaemon:
-      # Enable this to spawn an in-process IPFS node to use instead of a localhost
-      # HTTP agent. If this is disabled, the media repo will assume you have an HTTP
-      # IPFS agent running and accessible. Defaults to using a daemon (true).
-      enabled: true
-
-      # If the Daemon is enabled, set this to the location where the IPFS files should
-      # be stored. If you're using Docker, this should be something like "/data/ipfs"
-      # so it can be mapped to a volume.
-      repoPath: "./ipfs"
+  # No unstable features are currently supported.
 
 # Support for redis as a cache mechanism
 #
@@ -568,3 +558,41 @@ redis:
   shards:
     - name: "127.0.0.1"
       addr: ":6379"
+
+# Optional sentry (https://sentry.io/) configuration for the media repo
+sentry:
+  # Whether or not to set up error reporting. Defaults to off.
+  enabled: false
+
+  # Get this value from the setup instructions in Sentry
+  dsn: "https://examplePublicKey@ingest.sentry.io/0"
+
+  # Optional environment flag. Defaults to an empty string.
+  environment: ""
+
+  # Whether or not to turn on sentry's built in debugging. This will increase log output.
+  debug: false
+
+# Configuration for the internal tasks engine in the media repo. Note that this only applies
+# to the media repo process with machine ID zero (the default in single-instance mode).
+#
+# Tasks include things like data imports/exports.
+tasks:
+  # The number of workers to have available for tasks. Defaults to 5.
+  numWorkers: 5
+
+# Options for collecting PGO-compatible CPU profiles and submitting them to a hosted pgo-fleet
+# server. See https://github.com/t2bot/pgo-fleet for collection/more detail.
+#
+# If you process more than 1Hz of requests or have more than a dozen media repos deployed, please
+# get in contact with `@travis:t2l.io` to submit profiles directly to MMR. Submitted profiles are
+# used to improve the build speed for everyone.
+pgo:
+  # Whether collection is enabled. Defaults to false.
+  enabled: false
+
+  # The pgo-fleet submit URL.
+  submitUrl: "https://pgo-mmr.t2host.io/v1/submit"
+
+  # The pgo-fleet submit key.
+  submitKey: "INSERT_VALUE_HERE"
