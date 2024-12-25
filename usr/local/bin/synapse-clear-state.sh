@@ -1,5 +1,17 @@
 #!/bin/sh
 #
+# THIS SCRIPT IS REPLACED BY "synapse_auto_compressor" see:
+# https://github.com/matrix-org/rust-synapse-compress-state for details.
+#
+# run it via:
+#   synapse_auto_compressor -p "user=postgres dbname=matrix host=/var/run/postgresql" -c 500 -n 100
+#
+# after all you rooms are processed you can run a:
+#   REINDEX (VERBOSE) DATABASE CONCURRENTLY DATABASENAME
+# to free your discspace.
+#
+###
+#
 # you dont need to stop synapse.
 #
 # from: https://jo-so.de/2018-03/Matrix.html#state_groups_stateaufrumen
@@ -68,7 +80,8 @@ echo 'Enabling autovacuum on state_groups_state'
 psql -X -q -b -U "$username" -c 'alter table state_groups_state set (autovacuum_enabled = true);' $db
 
 echo 'Running VACUUM and ANALYZE for state_groups_state ...'
-$time psql -X -q -b -U "$username" -c 'VACUUM FULL ANALYZE state_groups_state' $db
+#$time psql -X -q -b -U "$username" -c 'VACUUM FULL ANALYZE state_groups_state' $db
+$time psql -X -q -b -U "$username" -c 'REINDEX (VERBOSE) DATABASE CONCURRENTLY' $db
 
 echo "All SQL scripts are in $PWD"
 
