@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-[[ ! -d /opt/Riot/resources ]] && mkdir -p /opt/Riot/resources
-cd /opt/Riot/resources
+
+[[ ! -d /opt/element/resources ]] && mkdir -p /opt/element/resources
+cd /opt/element/resources
 
 old_version="v$(cat webapp/version)"
 
@@ -19,27 +20,27 @@ if [[ "$new_version" == "$old_version" ]]; then
 	exit
 fi
 
-# Remove previous backup riot
-rm -rf riot.bak
+# Remove previous backup element
+rm -rf element.bak
 
-# Create temp directory for new riot
-mkdir riot.new
-cd riot.new
+# Create temp directory for new element
+mkdir element.new
+cd element.new
 
-echo "Downloading Riot $new_version"
-curl -L "$URL" -o riot-tmp.tar.gz
+echo "Downloading element $new_version"
+curl -L "$URL" -o element-tmp.tar.gz
 
 echo "Unpacking archive"
-tar -xzf riot-tmp.tar.gz --strip-components=1
-rm -f riot-tmp.tar.gz
+tar -xzf element-tmp.tar.gz --strip-components=1
+rm -f element-tmp.tar.gz
 
 echo "Replacing files"
 cd ..
-cp -f webapp/config.json riot.new/config.json
+cp -f webapp/config.json element.new/config.json
 # Back up old version and activate new version
 mv webapp webapp.bak
-mv riot.new webapp
+mv element.new webapp
 
-echo "Updated to Riot from $old_version to $new_version"
+echo "Updated to element from $old_version to $new_version"
 
 exit 0

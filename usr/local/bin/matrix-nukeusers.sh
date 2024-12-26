@@ -2,7 +2,7 @@
 set -e -u
 
 token=''
-domain='matrix.envs.net'
+domain=''
 username='matrix'
 db='matrix'
 file="$HOME/nukeusers.txt"
