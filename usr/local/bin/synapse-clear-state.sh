@@ -1,22 +1,6 @@
 #!/bin/sh
 #
-# THIS SCRIPT IS REPLACED BY "synapse_auto_compressor" see:
-# https://github.com/matrix-org/rust-synapse-compress-state for details.
-#
-# Before you execude the script better remove all rooms without local members.
-# see script "matrix-remove-empty-rooms.sh".
-#
-# now you can run synapse-compress-state via:
-#   synapse_auto_compressor -p "user=postgres dbname=matrix host=/var/run/postgresql" -c 500 -n 100
-# on a HS with ~50.000 rooms you need to run the script round about 500 times:
-#   for run in {1..500}; do sudo -u postgres synapse_auto_compressor -p "user=postgres dbname=matrix host=/var/run/postgresql" -c 500 -n 100; done
-# you can see the already "initialized" rooms in the DB table "state_compressor_progress".
-#
-# after all rooms are processed you can run a:
-#   REINDEX (VERBOSE) DATABASE CONCURRENTLY DATABASENAME
-# to free your discspace.
-#
-###
+# THIS SCRIPT IS REPLACED BY "matrix-compress-state.sh"
 #
 # you dont need to stop synapse.
 #
