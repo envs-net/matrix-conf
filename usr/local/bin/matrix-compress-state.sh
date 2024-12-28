@@ -31,7 +31,7 @@
 # 3. Replicate changes from state_compressor_state to state_compressor_progress
 # 4. run synapse_auto_compressor for 1 time or use $1
 
-set -e -u -o pipefail
+set -e -o pipefail
 
 date="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 
