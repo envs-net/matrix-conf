@@ -4,6 +4,12 @@
 
 more informations on https://envs.net/chat/matrix/
 
+**synapse blocklist tool:**
+
+An collection of modules for Synapse to block temporary email addresses and block invite-spam.
+
+see: https://git.envs.net/envs/synapse_blocklist_module
+
 ## useful documentations
 
 \- [matrix-spec](https://matrix.org/docs/spec/)  
