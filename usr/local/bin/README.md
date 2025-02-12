@@ -1,25 +1,31 @@
-**some useful aliases:**
+# useful aliases
 
+simple add it to your alias file.
+
+**deps.:**
 ```
 source "$HOME/.token" # contains $token
 server='server.tld'
 ```
 
-get a list of all rooms:
+## get a list of all rooms
+
 ```bash
 matrix-show_rooms() {
-	curl -s -H "Authorization: Bearer $token" -X GET 'https://'"$server"'/_synapse/admin/v1/rooms?order_by=state_events&limit=1000000' | jq -Mr . > ~/rooms.txt && nano ~/rooms.txt
+	curl -s -H "Authorization: Bearer $token" -X GET 'https://'"$server"'/_synapse/admin/v1/rooms?order_by=state_events&limit=1000000' | jq -Mr . > ~/rooms.txt && $EDITOR ~/rooms.txt
 }
 ```
 
-get a list of all users:
+## get a list of all users
+
 ```bash
 matrix-show_users() {
-	curl -s -H "Authorization: Bearer $token" -X GET 'https://'"$server"'/_synapse/admin/v2/users?from=0&limit=100000&guests=false' | jq -Mr . > ~/users.txt && nano ~/users.txt
+	curl -s -H "Authorization: Bearer $token" -X GET 'https://'"$server"'/_synapse/admin/v2/users?from=0&limit=100000&guests=false' | jq -Mr . > ~/users.txt && $EDITOR ~/users.txt
 }
 ```
 
-deactivate a list of user_ids:
+## deactivate a list of user_ids
+
 ```bash
 matrix-deactivate-users() {
 	while read i; do
@@ -30,7 +36,8 @@ matrix-deactivate-users() {
 }
 ```
 
-remove all rooms without local members:
+## remove all rooms without local members
+
 ```bash
 matrix-remove-empty-rooms() {
 	TOPURGE=$(curl -s -H "Authorization: Bearer $token" -X GET \
@@ -44,7 +51,8 @@ matrix-remove-empty-rooms() {
 }
 ```
 
-purge and block a list of room_ids and also deactivate all local users in this rooms:
+## purge and block a list of room_ids and also deactivate all local users in this rooms
+
 ```bash
 matrix-purge-rooms() {
 	echo > ~/blocked_members.txt
@@ -64,12 +72,13 @@ matrix-purge-rooms() {
 }
 ```
 
-get a list of all blocked room_ids:
+## get a list of all blocked room_ids
+
 ```bash
 matrix-get-blocked_rooms() {
 	sudo -iu postgres psql -d matrix -c "SELECT room_id FROM blocked_rooms" > ~/blocked_rooms.tmp
 	sed -i -e 's/ //' -e '1,2d' ~/blocked_rooms.tmp
-	head -n -2 /root/blocked_rooms.tmp > ~/blocked_rooms.txt
+	head -n -2 ~/blocked_rooms.tmp > ~/blocked_rooms.txt
 	rm ~/blocked_rooms.tmp
 }
 ```
